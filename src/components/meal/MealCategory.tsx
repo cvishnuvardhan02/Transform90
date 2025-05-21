@@ -11,11 +11,11 @@ interface MealCategoryProps {
 
 const MealCategory = ({ title, value, meals = [] }: MealCategoryProps) => {
   return (
-    <AccordionItem value={value} className="border border-accent-secondary rounded-md mb-3 overflow-hidden">
-      <AccordionTrigger className="px-4 py-3 hover:bg-dark-secondary/60 bg-dark-secondary/40 font-medium text-accent-primary">
+    <AccordionItem value={value} className="border border-blue-100 rounded-md mb-3 overflow-hidden">
+      <AccordionTrigger className="px-4 py-3 hover:bg-blue-50 bg-blue-100/50 font-medium">
         {title}
       </AccordionTrigger>
-      <AccordionContent className="bg-dark-secondary/10">
+      <AccordionContent>
         {meals.map((meal, index) => (
           <MealCard key={index} meal={meal} />
         ))}
