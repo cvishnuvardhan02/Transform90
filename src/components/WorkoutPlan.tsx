@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,6 +8,16 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
+import { Video, Play, Info } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface WorkoutPlanProps {
   userData: {
@@ -26,6 +35,7 @@ interface ExerciseData {
   notes?: string;
   caloriesBurned?: number; // Calories burned per minute
   duration?: number; // Duration in minutes
+  videoUrl?: string; // URL for tutorial video
 }
 
 interface WorkoutData {
@@ -38,6 +48,63 @@ interface WorkoutData {
 const WorkoutPlan = ({ userData }: WorkoutPlanProps) => {
   const [weekPhase, setWeekPhase] = useState("1-4");
   const { gender, goal, weight } = userData;
+  
+  // Video tutorial mapping (in a real app, these would be actual URLs to videos)
+  const exerciseVideos: Record<string, string> = {
+    "Jumping Jacks": "https://example.com/jumping-jacks",
+    "Bodyweight Squats": "https://example.com/bodyweight-squats",
+    "Push-ups": "https://example.com/push-ups",
+    "Mountain Climbers": "https://example.com/mountain-climbers",
+    "Plank": "https://example.com/plank",
+    "Brisk Walking/Jogging": "https://example.com/brisk-walking",
+    "Lunges": "https://example.com/lunges",
+    "Bicycle Crunches": "https://example.com/bicycle-crunches",
+    "Jumping Rope/High Knees": "https://example.com/jumping-rope",
+    "Glute Bridges": "https://example.com/glute-bridges",
+    "Plank to Push-up": "https://example.com/plank-to-pushup",
+    "Walking Lunges": "https://example.com/walking-lunges",
+    "Lateral Shuffles": "https://example.com/lateral-shuffles",
+    "Side Plank": "https://example.com/side-plank",
+    "Burpees": "https://example.com/burpees",
+    "Dumbbell Rows": "https://example.com/dumbbell-rows",
+    "Dumbbell Shoulder Press": "https://example.com/shoulder-press",
+    "Tricep Dips": "https://example.com/tricep-dips",
+    "Calf Raises": "https://example.com/calf-raises",
+    "Wall Sit": "https://example.com/wall-sit",
+    "Superman Hold": "https://example.com/superman-hold",
+  };
+  
+  // Exercise Video Component
+  const ExerciseTutorial = ({ exerciseName }: { exerciseName: string }) => {
+    const videoUrl = exerciseVideos[exerciseName] || "https://example.com/default-exercise";
+    
+    return (
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button variant="outline" size="sm" className="flex items-center gap-2 bg-blue-50 text-blue-700 hover:bg-blue-100">
+            <Play size={16} /> Watch Tutorial
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>{exerciseName} Tutorial</DialogTitle>
+            <DialogDescription>
+              Follow along with this tutorial to learn proper form.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="aspect-video bg-slate-100 rounded-md flex items-center justify-center border">
+            <div className="text-center p-6">
+              <Video className="mx-auto mb-4 text-blue-500" size={48} />
+              <p className="text-sm text-gray-600">
+                In an actual implementation, a video tutorial for "{exerciseName}" would be embedded here.
+              </p>
+              <p className="text-xs text-gray-500 mt-2">Video URL: {videoUrl}</p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  };
   
   // Calculate calories burned based on weight, duration and exercise intensity
   const calculateCaloriesBurned = (weight: number, exerciseName: string, duration: number) => {
@@ -505,8 +572,8 @@ const WorkoutPlan = ({ userData }: WorkoutPlanProps) => {
   ];
 
   return (
-    <div className="space-y-4">
-      <Tabs value={weekPhase} onValueChange={setWeekPhase} className="animate-fade-in">
+    <div className="space-y-4 animate-fade-in">
+      <Tabs value={weekPhase} onValueChange={setWeekPhase} className="w-full">
         <TabsList className="w-full">
           {phases.map((phase) => (
             <TabsTrigger key={phase.id} value={phase.id} className="flex-1">
@@ -520,7 +587,7 @@ const WorkoutPlan = ({ userData }: WorkoutPlanProps) => {
             {workoutPlan?.map((workout, index) => (
               <div key={index} className="border rounded-md p-4 mb-4 bg-gradient-to-r from-blue-50 to-indigo-50 shadow-md hover:shadow-lg transition-all duration-300">
                 <div className="flex justify-between items-center mb-3">
-                  <h4 className="font-bold">{workout.day}: {workout.title}</h4>
+                  <h4 className="font-bold text-blue-900">{workout.day}: {workout.title}</h4>
                   <Badge variant="outline" className="bg-blue-100">{workout.type}</Badge>
                 </div>
                 
@@ -534,13 +601,13 @@ const WorkoutPlan = ({ userData }: WorkoutPlanProps) => {
                         <AccordionTrigger className="hover:bg-blue-50 px-2 rounded-md">
                           <div className="flex justify-between items-center w-full pr-4">
                             <span>{exercise.name}</span>
-                            <Badge variant="secondary" className="bg-green-100 text-green-800">
+                            <Badge variant="secondary" className="bg-green-100 text-green-800 animate-pulse">
                               ~{caloriesBurned} kcal
                             </Badge>
                           </div>
                         </AccordionTrigger>
                         <AccordionContent className="px-2">
-                          <div className="grid grid-cols-3 gap-2 text-sm mt-2 mb-2">
+                          <div className="grid grid-cols-3 gap-2 text-sm mt-2 mb-3">
                             <div className="bg-blue-50 p-2 rounded">
                               <div className="font-medium text-blue-800">Sets</div>
                               <div>{exercise.sets}</div>
@@ -554,14 +621,33 @@ const WorkoutPlan = ({ userData }: WorkoutPlanProps) => {
                               <div>{exercise.rest}</div>
                             </div>
                           </div>
+                          
+                          <div className="flex flex-wrap justify-between items-center mt-3">
+                            <ExerciseTutorial exerciseName={exercise.name} />
+                            
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <div className="flex items-center gap-1 text-sm cursor-help text-blue-600">
+                                    <Info size={14} />
+                                    <span>Calorie Info</span>
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p className="max-w-xs text-sm">
+                                    This exercise burns approximately {caloriesBurned} calories based on your weight of {weight}kg 
+                                    over {exercise.duration} minutes of activity.
+                                  </p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </div>
+                          
                           {exercise.notes && (
-                            <div className="text-sm italic mt-1 pl-2 border-l-2 border-blue-300">
+                            <div className="text-sm italic mt-3 pl-2 border-l-2 border-blue-300">
                               {exercise.notes}
                             </div>
                           )}
-                          <div className="mt-2 text-sm">
-                            <span className="font-medium">Est. Calories:</span> This exercise burns approximately {caloriesBurned} calories based on your weight of {weight}kg.
-                          </div>
                         </AccordionContent>
                       </AccordionItem>
                     );
@@ -570,7 +656,7 @@ const WorkoutPlan = ({ userData }: WorkoutPlanProps) => {
               </div>
             ))}
             
-            <div className="text-sm text-gray-500 mt-2 p-3 bg-gray-50 rounded-md">
+            <div className="text-sm text-gray-600 mt-2 p-3 bg-blue-50 rounded-md border border-blue-100">
               <p>Rest days: Tuesday, Thursday, Saturday, Sunday</p>
               <p className="mt-1">
                 Always warm up for 5-10 minutes before each workout and cool down/stretch for 5-10 minutes after.

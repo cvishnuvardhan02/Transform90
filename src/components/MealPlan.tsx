@@ -8,6 +8,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface MealPlanProps {
   userData: {
@@ -16,6 +18,7 @@ interface MealPlanProps {
     proteinIntake: number;
     carbIntake: number;
     fatIntake: number;
+    weight: number; // Add weight to check protein requirements
   };
 }
 
@@ -30,12 +33,15 @@ interface MealData {
 
 const MealPlan = ({ userData }: MealPlanProps) => {
   const [weekPhase, setWeekPhase] = useState("1-4");
-  const { dietPreference } = userData;
+  const { dietPreference, weight } = userData;
+  
+  // Calculate recommended protein intake (1.5-2g per kg)
+  const minProteinTarget = Math.round(weight * 1.5);
+  const maxProteinTarget = Math.round(weight * 2);
   
   // Generate meal plans based on diet preference
   const getMealPlan = (phase: string) => {
     // These would typically come from a database or API
-    // Simplified example with just breakfast options
     const meals: { [key: string]: { [key: string]: MealData[] } } = {
       "vegan": {
         breakfast: [
@@ -103,6 +109,32 @@ const MealPlan = ({ userData }: MealPlanProps) => {
             ],
           },
         ],
+        snacks: [
+          {
+            name: "Vegan Protein Shake",
+            calories: 200,
+            protein: 25,
+            carbs: 10,
+            fat: 3,
+            ingredients: [
+              "1 scoop vegan protein powder",
+              "1 cup almond milk",
+              "1/2 banana",
+              "Ice cubes",
+            ],
+          },
+          {
+            name: "Edamame",
+            calories: 180,
+            protein: 17,
+            carbs: 15,
+            fat: 8,
+            ingredients: [
+              "1 cup edamame beans (shelled)",
+              "Sea salt to taste",
+            ],
+          }
+        ]
       },
       "vegetarian": {
         breakfast: [
@@ -121,17 +153,17 @@ const MealPlan = ({ userData }: MealPlanProps) => {
             ],
           },
           {
-            name: "Veggie and Cheese Omelette",
+            name: "Cottage Cheese with Fruit",
             calories: 350,
-            protein: 24,
-            carbs: 8,
-            fat: 24,
+            protein: 28,
+            carbs: 30,
+            fat: 10,
             ingredients: [
-              "3 eggs",
-              "30g cheese",
-              "1 cup mixed vegetables",
-              "1 tsp olive oil",
-              "Herbs and spices",
+              "1 cup cottage cheese",
+              "1/2 cup pineapple chunks",
+              "1/2 cup mixed berries",
+              "1 tbsp honey",
+              "1 tbsp walnuts",
             ],
           },
         ],
@@ -169,6 +201,32 @@ const MealPlan = ({ userData }: MealPlanProps) => {
             ],
           },
         ],
+        snacks: [
+          {
+            name: "Whey Protein Shake",
+            calories: 180,
+            protein: 25,
+            carbs: 6,
+            fat: 3,
+            ingredients: [
+              "1 scoop whey protein powder",
+              "1 cup milk",
+              "Ice cubes",
+            ],
+          },
+          {
+            name: "Trail Mix with Nuts and Dried Fruit",
+            calories: 220,
+            protein: 8,
+            carbs: 18,
+            fat: 14,
+            ingredients: [
+              "1/4 cup mixed nuts",
+              "2 tbsp dried cranberries",
+              "1 tbsp dark chocolate pieces",
+            ],
+          }
+        ]
       },
       "eggetarian": {
         breakfast: [
@@ -233,6 +291,32 @@ const MealPlan = ({ userData }: MealPlanProps) => {
             ],
           },
         ],
+        snacks: [
+          {
+            name: "Whey Protein Shake",
+            calories: 180,
+            protein: 25,
+            carbs: 6,
+            fat: 3,
+            ingredients: [
+              "1 scoop whey protein powder",
+              "1 cup milk",
+              "Ice cubes",
+            ],
+          },
+          {
+            name: "Hard-boiled Egg with Veggie Sticks",
+            calories: 170,
+            protein: 13,
+            carbs: 5,
+            fat: 10,
+            ingredients: [
+              "2 hard-boiled eggs",
+              "Carrot and celery sticks",
+              "2 tbsp hummus",
+            ],
+          }
+        ]
       },
       "non-vegetarian": {
         breakfast: [
@@ -300,6 +384,31 @@ const MealPlan = ({ userData }: MealPlanProps) => {
             ],
           },
         ],
+        snacks: [
+          {
+            name: "Whey Protein Shake",
+            calories: 180,
+            protein: 25,
+            carbs: 6,
+            fat: 3,
+            ingredients: [
+              "1 scoop whey protein powder",
+              "1 cup milk",
+              "Ice cubes",
+            ],
+          },
+          {
+            name: "Beef Jerky with Nuts",
+            calories: 240,
+            protein: 20,
+            carbs: 6,
+            fat: 16,
+            ingredients: [
+              "30g beef jerky",
+              "15g mixed nuts",
+            ],
+          }
+        ]
       },
     };
 
@@ -308,6 +417,31 @@ const MealPlan = ({ userData }: MealPlanProps) => {
 
   const mealPlan = getMealPlan(weekPhase);
   
+  // Calculate protein totals from the current meal plan
+  const calculateProteinTotal = () => {
+    if (!mealPlan) return 0;
+    
+    let total = 0;
+    if (mealPlan.breakfast) {
+      total += mealPlan.breakfast[0]?.protein || 0;
+    }
+    if (mealPlan.lunch) {
+      total += mealPlan.lunch[0]?.protein || 0;
+    }
+    if (mealPlan.dinner) {
+      total += mealPlan.dinner[0]?.protein || 0;
+    }
+    if (mealPlan.snacks) {
+      total += mealPlan.snacks[0]?.protein || 0;
+      total += mealPlan.snacks[1]?.protein || 0;
+    }
+    
+    return total;
+  };
+  
+  const proteinTotal = calculateProteinTotal();
+  const isProteinSufficient = proteinTotal >= minProteinTarget;
+  
   const phases = [
     { id: "1-4", label: "Weeks 1-4" },
     { id: "5-8", label: "Weeks 5-8" },
@@ -315,8 +449,45 @@ const MealPlan = ({ userData }: MealPlanProps) => {
   ];
 
   return (
-    <div className="space-y-4">
-      <Tabs value={weekPhase} onValueChange={setWeekPhase}>
+    <div className="space-y-4 animate-fade-in">
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg mb-4 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h3 className="text-lg font-medium text-blue-900">Daily Protein Target</h3>
+            <p className="text-sm text-blue-700">{minProteinTarget}-{maxProteinTarget}g protein per day</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="text-sm">
+              Current plan provides: <span className={`font-bold ${isProteinSufficient ? 'text-green-600' : 'text-amber-600'}`}>{proteinTotal}g</span>
+            </div>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="cursor-help">
+                    <Info size={18} className="text-blue-500" />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p>
+                    {isProteinSufficient 
+                      ? "Your meal plan meets the protein requirements" 
+                      : "Consider adding the recommended protein shake to meet your daily requirements"}
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        </div>
+        
+        {!isProteinSufficient && (
+          <div className="mt-3 p-2 bg-amber-50 border border-amber-200 rounded text-sm text-amber-800 animate-pulse">
+            <p className="font-medium">Protein Recommendation</p>
+            <p>Add 1-2 protein shakes daily to reach your protein target of {minProteinTarget}-{maxProteinTarget}g.</p>
+          </div>
+        )}
+      </div>
+
+      <Tabs value={weekPhase} onValueChange={setWeekPhase} className="w-full">
         <TabsList className="w-full">
           {phases.map((phase) => (
             <TabsTrigger key={phase.id} value={phase.id} className="flex-1">
@@ -326,15 +497,17 @@ const MealPlan = ({ userData }: MealPlanProps) => {
         </TabsList>
         
         {phases.map((phase) => (
-          <TabsContent key={phase.id} value={phase.id}>
+          <TabsContent key={phase.id} value={phase.id} className="animate-scale-in">
             <Accordion type="single" collapsible>
-              <AccordionItem value="breakfast">
-                <AccordionTrigger>Breakfast</AccordionTrigger>
+              <AccordionItem value="breakfast" className="border border-blue-100 rounded-md mb-3 overflow-hidden">
+                <AccordionTrigger className="px-4 py-3 hover:bg-blue-50 bg-blue-100/50 font-medium">
+                  Breakfast
+                </AccordionTrigger>
                 <AccordionContent>
                   {mealPlan?.breakfast?.map((meal, index) => (
-                    <div key={index} className="border rounded-md p-4 mb-3">
-                      <h4 className="font-medium mb-2">{meal.name}</h4>
-                      <div className="flex gap-3 text-sm mb-3">
+                    <div key={index} className="border rounded-md p-4 mb-3 transition-all hover:shadow-md">
+                      <h4 className="font-medium mb-2 text-blue-900">{meal.name}</h4>
+                      <div className="flex flex-wrap gap-2 text-sm mb-3">
                         <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded">
                           {meal.calories} cal
                         </span>
@@ -361,13 +534,15 @@ const MealPlan = ({ userData }: MealPlanProps) => {
                 </AccordionContent>
               </AccordionItem>
               
-              <AccordionItem value="lunch">
-                <AccordionTrigger>Lunch</AccordionTrigger>
+              <AccordionItem value="lunch" className="border border-blue-100 rounded-md mb-3 overflow-hidden">
+                <AccordionTrigger className="px-4 py-3 hover:bg-blue-50 bg-blue-100/50 font-medium">
+                  Lunch
+                </AccordionTrigger>
                 <AccordionContent>
                   {mealPlan?.lunch?.map((meal, index) => (
-                    <div key={index} className="border rounded-md p-4 mb-3">
-                      <h4 className="font-medium mb-2">{meal.name}</h4>
-                      <div className="flex gap-3 text-sm mb-3">
+                    <div key={index} className="border rounded-md p-4 mb-3 transition-all hover:shadow-md">
+                      <h4 className="font-medium mb-2 text-blue-900">{meal.name}</h4>
+                      <div className="flex flex-wrap gap-2 text-sm mb-3">
                         <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded">
                           {meal.calories} cal
                         </span>
@@ -394,13 +569,50 @@ const MealPlan = ({ userData }: MealPlanProps) => {
                 </AccordionContent>
               </AccordionItem>
               
-              <AccordionItem value="dinner">
-                <AccordionTrigger>Dinner</AccordionTrigger>
+              <AccordionItem value="dinner" className="border border-blue-100 rounded-md mb-3 overflow-hidden">
+                <AccordionTrigger className="px-4 py-3 hover:bg-blue-50 bg-blue-100/50 font-medium">
+                  Dinner
+                </AccordionTrigger>
                 <AccordionContent>
                   {mealPlan?.dinner?.map((meal, index) => (
-                    <div key={index} className="border rounded-md p-4 mb-3">
-                      <h4 className="font-medium mb-2">{meal.name}</h4>
-                      <div className="flex gap-3 text-sm mb-3">
+                    <div key={index} className="border rounded-md p-4 mb-3 transition-all hover:shadow-md">
+                      <h4 className="font-medium mb-2 text-blue-900">{meal.name}</h4>
+                      <div className="flex flex-wrap gap-2 text-sm mb-3">
+                        <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                          {meal.calories} cal
+                        </span>
+                        <span className="bg-red-100 text-red-800 px-2 py-1 rounded">
+                          P: {meal.protein}g
+                        </span>
+                        <span className="bg-green-100 text-green-800 px-2 py-1 rounded">
+                          C: {meal.carbs}g
+                        </span>
+                        <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
+                          F: {meal.fat}g
+                        </span>
+                      </div>
+                      <div className="text-sm">
+                        <h5 className="font-medium mb-1">Ingredients:</h5>
+                        <ul className="list-disc pl-4 space-y-1">
+                          {meal.ingredients.map((ingredient, idx) => (
+                            <li key={idx}>{ingredient}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  ))}
+                </AccordionContent>
+              </AccordionItem>
+              
+              <AccordionItem value="snacks" className="border border-blue-100 rounded-md mb-3 overflow-hidden">
+                <AccordionTrigger className="px-4 py-3 hover:bg-blue-50 bg-blue-100/50 font-medium">
+                  Snacks & Supplements
+                </AccordionTrigger>
+                <AccordionContent>
+                  {mealPlan?.snacks?.map((meal, index) => (
+                    <div key={index} className="border rounded-md p-4 mb-3 transition-all hover:shadow-md">
+                      <h4 className="font-medium mb-2 text-blue-900">{meal.name}</h4>
+                      <div className="flex flex-wrap gap-2 text-sm mb-3">
                         <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded">
                           {meal.calories} cal
                         </span>
