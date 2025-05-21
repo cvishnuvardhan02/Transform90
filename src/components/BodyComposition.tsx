@@ -1,7 +1,7 @@
 
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Heart, Weight, Dumbbell, Body } from "lucide-react";
+import { Heart, Weight, Dumbbell, Activity } from "lucide-react";
 
 interface BodyCompositionProps {
   userData: {
@@ -56,7 +56,7 @@ const BodyComposition = ({ userData }: BodyCompositionProps) => {
         <Card className="p-5 shadow-md flex flex-col">
           <div className="flex items-center mb-4">
             <div className="bg-blue-100 p-2 rounded-full mr-3">
-              <Body className="h-6 w-6 text-blue-600" />
+              <Activity className="h-6 w-6 text-blue-600" />
             </div>
             <h3 className="text-lg font-semibold">Body Mass Index (BMI)</h3>
           </div>
