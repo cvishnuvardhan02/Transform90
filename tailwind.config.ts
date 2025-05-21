@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -19,6 +20,16 @@ export default {
 		},
 		extend: {
 			colors: {
+				// Custom color palette
+				dark: {
+					primary: '#0B0C10',
+					secondary: '#1F2833',
+				},
+				accent: {
+					primary: '#66FCF1',
+					secondary: '#45A29E',
+				},
+				// Original shadcn colors
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',
